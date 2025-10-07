@@ -7,6 +7,8 @@ use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PrizeDrawSeeder extends Seeder
 {
@@ -15,20 +17,33 @@ class PrizeDrawSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create users
-        $users = User::factory(10)->create();
+        // 1️⃣ Create users
+        $users = User::factory(10000)->create();
 
-        // Create draws
-        $draws = Draw::factory(3)->create();
+        // 2️⃣ Create draws
+        $draws = Draw::factory(1)->create();
 
         foreach ($draws as $draw) {
+            $tickets = [];
+
             foreach ($users as $user) {
-                // Give each user 1–5 tickets for each draw
-                $ticketCount = rand(1, 5);
-                Ticket::factory($ticketCount)->create([
-                    'user_id' => $user->id,
-                    'draw_id' => $draw->id,
-                ]);
+                // Random number of tickets per user (1–500)
+                $ticketCount = rand(1, 50);
+
+                for ($i = 0; $i < $ticketCount; $i++) {
+                    $tickets[] = [
+                        'user_id' => $user->id,
+                        'draw_id' => $draw->id,
+                        'code' => Str::upper(Str::random(10)), // unique code
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+
+            // 3️⃣ Insert tickets in chunks to avoid memory issues
+            foreach (array_chunk($tickets, 10000) as $chunk) {
+                DB::table('tickets')->insert($chunk);
             }
         }
     }
