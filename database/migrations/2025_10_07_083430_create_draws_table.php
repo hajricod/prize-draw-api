@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('draws', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->dateTime('draw_date')->nullable();
+            $table->foreignId('winner_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->enum('status', ['open', 'closed', 'completed'])->default('open');
             $table->timestamps();
         });
     }
