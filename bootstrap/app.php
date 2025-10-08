@@ -15,15 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->group('api', [
-            EnsureFrontendRequestsAreStateful::class,
-        ]);
+        // $middleware->group('api', [
+        //     EnsureFrontendRequestsAreStateful::class,
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthenticationException $e, $request) {
-
-        if ($request->is('api/*') || $request->expectsJson()) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-    });
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+        });
     })->create();
