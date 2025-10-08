@@ -26,7 +26,33 @@ class DrawController extends Controller
     // View draw details
     public function show(Draw $draw)
     {
-        return response()->json($draw->load('tickets.user', 'winner'));
+        $drawData = [
+            'id' => $draw->id,
+            'name' => $draw->name,
+            'status' => $draw->status,
+            'total_tickets' => $draw->tickets()->count(),
+            // 'participants' => $draw->tickets()
+            //     ->select('user_id', DB::raw('count(*) as tickets_count'))
+            //     ->groupBy('user_id')
+            //     ->with('user:id,name,email') // only load essential user columns
+            //     ->get()
+            //     ->map(function($ticket) {
+            //         return [
+            //             'id' => $ticket->user->id,
+            //             'name' => $ticket->user->name,
+            //             'email' => $ticket->user->email,
+            //             'tickets_count' => $ticket->tickets_count,
+            //         ];
+            //     }),
+            'winner' => $draw->winner ? [
+                'id' => $draw->winner->id,
+                'name' => $draw->winner->name,
+                'tickets_in_draw' => $draw->tickets()->where('user_id', $draw->winner->id)->count()
+            ] : null
+        ];
+
+        return response()->json($drawData);
+
     }
 
     // Pick random weighted winner
